@@ -17,3 +17,47 @@
 ## 🔍 Inferencing on *MotionEdit-Bench* with Image Editing Models
 We have released our [MotionEdit-Bench](https://huggingface.co/datasets/elaine1wan/MotionEdit-Bench) on Huggingface.
 In this Github Repository, we provide code that supports easy inference across open-source Image Editing models: ***Qwen-Image-Edit***, ***Flux.1 Kontext [Dev]***, ***InstructPix2Pix***, ***HQ-Edit***, ***Step1X-Edit***, ***UltraEdit***, ***MagicBrush***, and ***AnyEdit***.
+
+
+### Step 1: Environment Setup
+Clone this github repository and switch to the directory.
+
+```
+git clone https://github.com/elainew728/motion-edit.git
+cd motion-edit
+```
+
+Create and activate the conda environment with dependencies that supports inference and training. 
+
+> * **Note:** some models like UltraEdit requires specific dependencies on the diffusers library. Please refer to their official repository to resolve dependencies before running inference.
+
+```
+conda env create -f environment.yml
+conda activate motionedit
+```
+
+### Step 2: Data Preparation
+The inference script default to using our [MotionEdit-Bench](https://huggingface.co/datasets/elaine1wan/MotionEdit-Bench), which will download the dataset from Huggingface. You can specify a `cache_dir` for storing the cached data.
+
+Additionally, you can construct your own dataset for inference. Please organize all input images into a folder `INPUT_FOLDER` and create a `metadata.jsonl` in the same directory. The `metadata.jsonl` file **must** at least contain entries with 2 entries: 
+```
+{
+    "file_name": IMAGE_NAME.EXT,
+    "prompt": PROMPT
+}
+```
+
+Then, load your dataset by:
+```
+from datasets import load_dataset
+dataset = load_dataset("imagefolder", data_dir=INPUT_FOLDER)
+```
+
+### Step 3: Running Inference
+You can run inference on model of your choice by specifying in the arguments. For instance, here's a sample script for running inference on Qwen-Image-Edit:
+```
+python run_image_editing.py \
+    -o "./outputs/" \
+    -m "qwen-image-edit" \
+    --seed 42
+```
