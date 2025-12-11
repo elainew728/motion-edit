@@ -37,7 +37,7 @@ Create and activate the conda environment with dependencies that supports infere
 conda env create -f environment.yml
 conda activate motionedit
 ```
-Finally, configure your own huggingface token to access restricted models by modifying `YOUR_HF_TOKEN_HERE` in `run_image_editing.py`.
+Finally, configure your own huggingface token to access restricted models by modifying `YOUR_HF_TOKEN_HERE` in `inference/run_image_editing.py`.
 
 ### Step 2: Data Preparation
 The inference script default to using our [MotionEdit-Bench](https://huggingface.co/datasets/elaine1wan/MotionEdit-Bench), which will download the dataset from Huggingface. You can specify a `cache_dir` for storing the cached data.
@@ -57,9 +57,16 @@ dataset = load_dataset("imagefolder", data_dir=INPUT_FOLDER)
 ```
 
 ### Step 3: Running Inference
-You can run inference on model of your choice by specifying in the arguments. For instance, here's a sample script for running inference on Qwen-Image-Edit:
+Use the following command to run inference on **MotionEdit-Bench** with our ***MotionNFT*** checkpoint, trained on **MotionEdit** with Qwen-Image-Edit as the base model:
 ```
-python run_image_editing.py \
+python inference/run_image_editing.py \
+    -o "./outputs/" \
+    -m "motionedit" \
+    --seed 42
+```
+Alternatively, our code supports inferencing multiple open-source image editing models. You can run inference on model of your choice by specifying in the arguments. For instance, here's a sample script for running inference on Qwen-Image-Edit:
+```
+python inference/run_image_editing.py \
     -o "./outputs/" \
     -m "qwen-image-edit" \
     --seed 42
