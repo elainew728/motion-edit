@@ -12,8 +12,10 @@
 # 📣 News
 * **[2025/12/11]**: 🤩 We release **MotionEdit**, a novel dataset and benchmark for motion-centric image editing. Along with the dataset, we propose **MotionNFT (Motion-guided Negative-aware FineTuning)**, a post-training framework with motion alignment rewards to guide models on motion editing task.
 
-
 # 🔧 Usage
+## 🚀 (Coming Soon!) Training with MotionNFT
+We plan to release the training pipeline using our MotionNFT method soon. Stay tuned!
+
 ## 🔍 Inferencing on *MotionEdit-Bench* with Image Editing Models
 We have released our [MotionEdit-Bench](https://huggingface.co/datasets/elaine1wan/MotionEdit-Bench) on Huggingface.
 In this Github Repository, we provide code that supports easy inference across open-source Image Editing models: ***Qwen-Image-Edit***, ***Flux.1 Kontext [Dev]***, ***InstructPix2Pix***, ***HQ-Edit***, ***Step1X-Edit***, ***UltraEdit***, ***MagicBrush***, and ***AnyEdit***.
