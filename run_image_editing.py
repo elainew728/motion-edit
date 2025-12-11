@@ -200,11 +200,13 @@ if __name__ == "__main__":
     else:
         dataset = load_dataset("elaine1wan/MotionEdit-Bench")["train"]
 
+    all_items = [row for row in tqdm(dataset)]
     if args.test:
-        dataset = dataset[:10]
+        all_items = all_items[:10]
 
-    slices = [dataset[i::gpu_count] for i in range(gpu_count)]
+    slices = [all_items[i::gpu_count] for i in range(gpu_count)]
     del dataset
+    del all_items
 
     ray.get([
         process_slice.remote(
