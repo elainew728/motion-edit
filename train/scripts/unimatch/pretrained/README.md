@@ -1,0 +1,1 @@
+Download the unimatch checkpoint in this directory. Your motion-edit folder structure should look like: motion-edit/train/scripts/unimatch/pretrained/gmflow-scale2-regrefine6-mixdata-train320x576-4e7b215d.pth
