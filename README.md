@@ -35,6 +35,7 @@ Create and activate the conda environment with dependencies that supports infere
 conda env create -f environment.yml
 conda activate motionedit
 ```
+Finally, configure your own huggingface token to access restricted models by modifying `YOUR_HF_TOKEN_HERE` in `run_image_editing.py`.
 
 ### Step 2: Data Preparation
 The inference script default to using our [MotionEdit-Bench](https://huggingface.co/datasets/elaine1wan/MotionEdit-Bench), which will download the dataset from Huggingface. You can specify a `cache_dir` for storing the cached data.
