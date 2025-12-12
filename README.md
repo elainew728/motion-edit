@@ -13,15 +13,7 @@
 * **[2025/12/11]**: 🤩 We release **MotionEdit**, a novel dataset and benchmark for motion-centric image editing. Along with the dataset, we propose **MotionNFT (Motion-guided Negative-aware FineTuning)**, a post-training framework with motion alignment rewards to guide models on motion editing task.
 
 # 🔧 Usage
-## 🚀 (Coming Soon!) Training with MotionNFT
-We plan to release the training pipeline using our MotionNFT method soon. Stay tuned!
-
-## 🔍 Inferencing on *MotionEdit-Bench* with Image Editing Models
-We have released our [MotionEdit-Bench](https://huggingface.co/datasets/elaine1wan/MotionEdit-Bench) on Huggingface.
-In this Github Repository, we provide code that supports easy inference across open-source Image Editing models: ***Qwen-Image-Edit***, ***Flux.1 Kontext [Dev]***, ***InstructPix2Pix***, ***HQ-Edit***, ***Step1X-Edit***, ***UltraEdit***, ***MagicBrush***, and ***AnyEdit***.
-
-
-### Step 1: Environment Setup
+## ✨ To Start: Environment Setup
 Clone this github repository and switch to the directory.
 
 ```
@@ -39,7 +31,69 @@ conda activate motionedit
 ```
 Finally, configure your own huggingface token to access restricted models by modifying `YOUR_HF_TOKEN_HERE` in `inference/run_image_editing.py`.
 
-### Step 2: Data Preparation
+
+## 🚀 Training with MotionNFT
+We are working on releasing and refining the training pipeline using our MotionNFT method. Stay tuned!
+
+To run training code, first change your working directory to the train folder:
+```
+cd train
+```
+
+### Step 0: Data Format
+Please format your training data according to the following structure. Place your `{}_metadata.jsonl` files under the folder `motionedit_data/` in the `train/` directory.
+
+Data Folder structure:
+
+```
+- motionedit_data
+  - images/
+     - YOUR_IMAGE_DATA
+     - ...
+  - train_metadata.jsonl
+  - test_metadata.jsonl
+```
+
+`train_metadata.jsonl` and `test_metadata.jsonl` format:
+
+```
+{"prompt": "PROMPT", "image": ["INPUT_IMAGE_PATH", "TARGET_IMAGE_PATH"]}
+...
+```
+
+### Step 1: Deploy vLLM Reward Server
+
+Start the reward server:
+
+```
+python reward_server/reward_server.py
+```
+
+### Step 2: Configure Training
+
+See `config/qwen_image_edit_nft.py` and `config/kontext_nft.py` for available configurations.
+
+### Step 3: Run Training
+
+```shell
+export REWARD_SERVER=[YOUR_REWARD_SERVICE_IP_ADDR]:12341
+RANK=[MACHINE_RANK]
+MASTER_ADDR=[MASTER_ADDR]
+MASTER_PORT=[MASTER_PORT]
+
+accelerate launch --config_file flow_grpo/accelerate_configs/deepspeed_zero2.yaml \
+    --num_machines 2 --num_processes 16 \
+    --machine_rank ${RANK} --main_process_ip ${MASTER_ADDR} --main_process_port ${MASTER_PORT} \
+    scripts/train_nft_qwen_image_edit.py --config config/qwen_image_edit_nft.py:qwen_motion_edit_reward 
+```
+
+
+## 🔍 Inferencing on *MotionEdit-Bench* with Image Editing Models
+We have released our [MotionEdit-Bench](https://huggingface.co/datasets/elaine1wan/MotionEdit-Bench) on Huggingface.
+In this Github Repository, we provide code that supports easy inference across open-source Image Editing models: ***Qwen-Image-Edit***, ***Flux.1 Kontext [Dev]***, ***InstructPix2Pix***, ***HQ-Edit***, ***Step1X-Edit***, ***UltraEdit***, ***MagicBrush***, and ***AnyEdit***.
+
+
+### Step 1: Data Preparation
 The inference script default to using our [MotionEdit-Bench](https://huggingface.co/datasets/elaine1wan/MotionEdit-Bench), which will download the dataset from Huggingface. You can specify a `cache_dir` for storing the cached data.
 
 Additionally, you can construct your own dataset for inference. Please organize all input images into a folder `INPUT_FOLDER` and create a `metadata.jsonl` in the same directory. The `metadata.jsonl` file **must** at least contain entries with 2 entries: 
@@ -56,7 +110,7 @@ from datasets import load_dataset
 dataset = load_dataset("imagefolder", data_dir=INPUT_FOLDER)
 ```
 
-### Step 3: Running Inference
+### Step 2: Running Inference
 Use the following command to run inference on **MotionEdit-Bench** with our ***MotionNFT*** checkpoint, trained on **MotionEdit** with Qwen-Image-Edit as the base model:
 ```
 python inference/run_image_editing.py \
