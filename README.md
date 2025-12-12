@@ -62,7 +62,7 @@ Data Folder structure:
 ```
 
 ### Step 1: Deploy vLLM Reward Server
-To set up the vLLM server for the MLLM feedback reward, first configure the path to your local `Qwen2.5-VL-32B-Instruct` model checkpoint by modifying `YOUR_MODEL_PATH` in [train/reward_server/reward_server.py](https://github.com/elainew728/motion-edit/edit/main/train/reward_server/reward_server.py).
+To set up the vLLM server for the MLLM feedback reward, first configure the path to your local `Qwen2.5-VL-32B-Instruct` model checkpoint by modifying `YOUR_MODEL_PATH` in [train/reward_server/reward_server.py](https://github.com/elainew728/motion-edit/tree/main/train/reward_server/reward_server.py).
 
 Then, you can start the reward server:
 
