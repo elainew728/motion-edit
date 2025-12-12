@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="https://github.com/elainew728/motion-edit/blob/main/gh_imgs/MotionEdit.png" width="1000"/>
+    <img src="https://github.com/elainew728/motion-edit/blob/main/MotionEdit.png" width="900"/>
 <p>
 
 # MotionEdit: Benchmarking and Learning Motion-Centric Image Editing
