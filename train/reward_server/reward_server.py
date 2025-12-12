@@ -23,7 +23,7 @@ app = Flask(__name__)
 # Global variables
 score_idx = [15, 16, 17, 18, 19, 20]
 workers = []  # Ray actors for each GPU
-MODEL_PATH = "/gy_1/share_302625455/user/elaine1wan/multi-edit/Qwen2.5-VL-32B-Instruct/"
+MODEL_PATH = YOUR_MDEL_PATH # "./Qwen2.5-VL-32B-Instruct/"
 NUM_GPUS = 8
 NUM_TP = 2
 
