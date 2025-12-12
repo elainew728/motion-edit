@@ -29,7 +29,7 @@ Create and activate the conda environment with dependencies that supports infere
 conda env create -f environment.yml
 conda activate motionedit
 ```
-Finally, configure your own huggingface token to access restricted models by modifying `YOUR_HF_TOKEN_HERE` in `inference/run_image_editing.py`.
+Finally, configure your own huggingface token to access restricted models by modifying `YOUR_HF_TOKEN_HERE` in [inference/run_image_editing.py](https://github.com/elainew728/motion-edit/tree/main/inference/run_image_editing.py).
 
 
 ## 🚀 Training with MotionNFT
@@ -72,7 +72,7 @@ python reward_server/reward_server.py
 
 ### Step 2: Configure Training
 
-See `config/qwen_image_edit_nft.py` and `config/kontext_nft.py` for available configurations.
+See [train/config/qwen_image_edit_nft.py](https://github.com/elainew728/motion-edit/tree/main/train/config/qwen_image_edit_nft.py) and [train/config/kontext_nft.py](https://github.com/elainew728/motion-edit/tree/main/train/config/kontext_nft.py) for available configurations.
 
 ### Step 3: Run Training
 
