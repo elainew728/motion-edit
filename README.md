@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="https://github.com/elainew728/motion-edit/blob/main/MotionEdit.png" width="900"/>
+    <img src="./media/MotionEdit.png" width="900"/>
 <p>
 
 # MotionEdit: Benchmarking and Learning Motion-Centric Image Editing
@@ -8,6 +8,7 @@
 [![Twitter](https://img.shields.io/badge/-Twitter@yixin_wan_-black?logo=twitter&logoColor=1D9BF0)](https://x.com/yixin_wan_?s=21&t=EqTxUZPAldbQnbhLN-CETA)
 [![proj_page](https://img.shields.io/badge/Project_Page-ffcae2?style=flat-square)](https://motion-edit.github.io/) <br><br>
 
+<img src="./media/examples_1.gif" width="100%" alt="MotionNFT Examples 1">
 
 # 📣 News
 * **[2025/12/11]**: 🤩 We release **MotionEdit**, a novel dataset and benchmark for motion-centric image editing. Along with the dataset, we propose **MotionNFT (Motion-guided Negative-aware FineTuning)**, a post-training framework with motion alignment rewards to guide models on motion editing task.
