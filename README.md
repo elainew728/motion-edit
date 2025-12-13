@@ -1,14 +1,19 @@
-<p align="center">
+<div align="center">
     <img src="./media/MotionEdit.png" width="900"/>
-<p>
 
 # MotionEdit: Benchmarking and Learning Motion-Centric Image Editing
 [![MotionEdit](https://img.shields.io/badge/Arxiv-MotionEdit-b31b1b.svg?logo=arXiv)](https://motion-edit.github.io/)
 [![hf_dataset](https://img.shields.io/badge/🤗-HF_Dataset-red.svg)](https://huggingface.co/datasets/elaine1wan/MotionEdit-Bench)
 [![Twitter](https://img.shields.io/badge/-Twitter@yixin_wan_-black?logo=twitter&logoColor=1D9BF0)](https://x.com/yixin_wan_?s=21&t=EqTxUZPAldbQnbhLN-CETA)
-[![proj_page](https://img.shields.io/badge/Project_Page-ffcae2?style=flat-square)](https://motion-edit.github.io/) <br><br>
+[![proj_page](https://img.shields.io/badge/Project_Page-ffcae2?style=flat-square)](https://motion-edit.github.io/) <br>
+
+[Yixin Wan](https://elainew728.github.io/)<sup>1,2</sup>, [Lei Ke](https://www.kelei.site/)<sup>1</sup>, [Wenhao Yu](https://wyu97.github.io/)<sup>1</sup>, [Kai-Wei Chang](https://web.cs.ucla.edu/~kwchang/)<sup>2</sup>, [Dong Yu](https://sites.google.com/view/dongyu888/)<sup>1</sup>
+
+<sup>1</sup>Tencent AI, Seattle   &nbsp;  <sup>2</sup>University of California, Los Angeles
 
 <img src="./media/examples_1.gif" width="100%" alt="MotionNFT Examples 1">
+
+</div>
 
 # 📣 News
 * **[2025/12/11]**: 🤩 We release **MotionEdit**, a novel dataset and benchmark for motion-centric image editing. Along with the dataset, we propose **MotionNFT (Motion-guided Negative-aware FineTuning)**, a post-training framework with motion alignment rewards to guide models on motion editing task.
