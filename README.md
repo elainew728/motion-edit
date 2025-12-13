@@ -15,6 +15,9 @@
 
 </div>
 
+# ✨ Overview
+**MotionEdit** is a novel dataset and benchmark for motion-centric image editing. We also propose **MotionNFT** (Motion-guided Negative-aware FineTuning), a post-training framework with motion alignment rewards to guide models on motion image editing task.
+
 # 📣 News
 * **[2025/12/11]**: 🤩 We release **MotionEdit**, a novel dataset and benchmark for motion-centric image editing. Along with the dataset, we propose **MotionNFT (Motion-guided Negative-aware FineTuning)**, a post-training framework with motion alignment rewards to guide models on motion editing task.
 
