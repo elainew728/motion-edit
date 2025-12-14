@@ -53,7 +53,7 @@ dependencies:
       - cycler==0.12.1
       - datasets==3.3.2
       - deepspeed==0.15.4
-      - diffusers==0.36.0.dev0
+      # - diffusers==0.36.0.dev0
       - dill==0.3.8
       - distro==1.9.0
       - docker-pycreds==0.4.0
