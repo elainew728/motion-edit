@@ -1,3 +1,4 @@
+# Copyright (c) MotionEdit Team, Tencent AI Seattle (https://motion-edit.github.io/)
 from PIL import Image
 import io
 import os
