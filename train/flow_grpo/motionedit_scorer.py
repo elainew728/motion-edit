@@ -1,3 +1,4 @@
+# Copyright (c) MotionEdit Team, Tencent AI Seattle (https://motion-edit.github.io/)
 import copy
 import math
 from typing import Any, Dict, Optional
