@@ -1,3 +1,5 @@
+# Copyright (c) MotionEdit Team, Tencent AI Seattle (https://motion-edit.github.io/)
+
 import os
 import PIL
 import torch
