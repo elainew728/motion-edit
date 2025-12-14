@@ -10,7 +10,7 @@
 
 [Yixin Wan](https://elainew728.github.io/)<sup>1,2</sup>, [Lei Ke](https://www.kelei.site/)<sup>1</sup>, [Wenhao Yu](https://wyu97.github.io/)<sup>1</sup>, [Kai-Wei Chang](https://web.cs.ucla.edu/~kwchang/)<sup>2</sup>, [Dong Yu](https://sites.google.com/view/dongyu888/)<sup>1</sup>
 
-<sup>1</sup>Tencent AI, Seattle   &nbsp;  <sup>2</sup>University of California, Los Angeles
+<sup>1</sup>*Tencent AI, Seattle*   &nbsp;  <sup>2</sup>*University of California, Los Angeles*
 
 <img src="./media/examples_1.gif" width="100%" alt="MotionNFT Examples 1">
 
