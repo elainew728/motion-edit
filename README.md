@@ -141,13 +141,10 @@ python inference/run_image_editing.py \
 Please consider citing our paper if you find our research useful. We appreciate your recognition!
 
 ```bibtex
-@misc{wan2025motioneditbenchmarkinglearningmotioncentric,
+@article{motionedit,
       title={MotionEdit: Benchmarking and Learning Motion-Centric Image Editing}, 
       author={Yixin Wan and Lei Ke and Wenhao Yu and Kai-Wei Chang and Dong Yu},
       year={2025},
-      eprint={2512.10284},
-      archivePrefix={arXiv},
-      primaryClass={cs.CV},
-      url={https://arxiv.org/abs/2512.10284}, 
+      journal={arXiv preprint arXiv:2512.10284},
 }
 ```
