@@ -112,7 +112,7 @@ def process_slice(slice_items, model_name, lora_path, output_dir, seed):
             if os.path.exists(output_filepath):
                 continue
 
-            input_image = item["image"]
+            input_image = item["input_image"]
             w, h = input_image.size
 
             if model_name in ["qwen-image-edit", "motionedit"]:
