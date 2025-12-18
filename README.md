@@ -42,6 +42,18 @@ conda activate motionedit
 Finally, configure your own huggingface token to access restricted models by modifying `YOUR_HF_TOKEN_HERE` in [inference/run_image_editing.py](https://github.com/elainew728/motion-edit/tree/main/inference/run_image_editing.py).
 
 
+## 🔹 Quick Single-Image Demo
+If you just want to edit a single image with our MotionNFT checkpoint, place the original input image file and your text prompt (in `.txt` format, same file name as the image file) inside `examples/input_examples/`. Then, run `examples/run_inference_single.py` to inference on the input image with your prompt. 
+
+We have prepared 3 input images from our **MotionEdit-Bench** dataset in the `examples/input_examples/` folder. Play around with them by running the following example code:
+```
+python examples/run_inference_single.py \
+    --input_image examples/input_examples/512.jpg \
+    --output_dir examples/output_examples
+```
+The script automatically loads `examples/input_examples/512.txt` when `--prompt` is omitted. You can still override the prompt or supply a local LoRA via `--prompt`/`--lora_path` if needed.
+
+
 ## 🚀 Training with MotionNFT
 We are working on releasing and refining the training pipeline using our MotionNFT method. Stay tuned!
 
@@ -99,24 +111,11 @@ accelerate launch --config_file flow_grpo/accelerate_configs/deepspeed_zero2.yam
 ```
 
 
-## 🔍 Inferencing on *MotionEdit-Bench* with Image Editing Models
+## 🔍 Large-Scale Inferencing on *MotionEdit-Bench* with Image Editing Models
 We have released our [MotionEdit-Bench](https://huggingface.co/datasets/elaine1wan/MotionEdit-Bench) on Huggingface.
 In this Github Repository, we provide code that supports easy inference across open-source Image Editing models: ***Qwen-Image-Edit***, ***Flux.1 Kontext [Dev]***, ***InstructPix2Pix***, ***HQ-Edit***, ***Step1X-Edit***, ***UltraEdit***, ***MagicBrush***, and ***AnyEdit***.
 
-### 🔹 Quick Single-Image Demo
-If you just want to edit a single image with our MotionNFT checkpoint, place the original input image file and your text prompt (in `.txt` format, same file name as the image file) inside `examples/input_examples/`. Then, run `examples/run_inference_single.py` to inference on the input image with your prompt. 
-
-We have prepared 3 input images from our **MotionEdit-Bench** dataset in the `examples/input_examples/` folder. Play around with them by running the following example code:
-```
-python examples/run_inference_single.py \
-    --input_image examples/input_examples/512.jpg \
-    --output_dir examples/output_examples
-```
-The script automatically loads `examples/input_examples/512.txt` when `--prompt` is omitted. You can still override the prompt or supply a local LoRA via `--prompt`/`--lora_path` if needed.
-
-
-### Large-Scale Inferencing
-#### Step 1: Data Preparation
+### Step 1: Data Preparation
 The inference script default to using our [MotionEdit-Bench](https://huggingface.co/datasets/elaine1wan/MotionEdit-Bench), which will download the dataset from Huggingface. You can specify a `cache_dir` for storing the cached data.
 
 Additionally, you can construct your own dataset for inference. Please organize all input images into a folder `INPUT_FOLDER` and create a `metadata.jsonl` in the same directory. The `metadata.jsonl` file **must** at least contain entries with 2 entries: 
@@ -133,7 +132,7 @@ from datasets import load_dataset
 dataset = load_dataset("imagefolder", data_dir=INPUT_FOLDER)
 ```
 
-#### Step 2: Running Inference
+### Step 2: Running Inference
 Use the following command to run inference on **MotionEdit-Bench** with our ***MotionNFT*** checkpoint, trained on **MotionEdit** with Qwen-Image-Edit as the base model:
 ```
 python inference/run_image_editing.py \
