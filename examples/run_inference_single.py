@@ -1,18 +1,8 @@
 # Copyright (c) MotionEdit Team, Tencent AI Seattle (https://motion-edit.github.io/)
 
-"""
-Minimal MotionEdit inference script for a single image.
-
-Example:
-    python examples/run_inference_single.py \\
-        --input_image examples/input_examples/sample.jpg \\
-        --prompt "Add neon light trails behind the subject"
-"""
-
 import argparse
 from pathlib import Path
 from typing import Optional
-
 import torch
 from diffusers import QwenImageEditPlusPipeline
 from PIL import Image
