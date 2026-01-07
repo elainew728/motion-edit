@@ -28,21 +28,35 @@ class MagicBrush():
 
 
 @ray.remote(num_gpus=1)
-def process_slice(slice_items, model_name, lora_path, output_dir, seed):
+def process_slice(slice_items, model_name, lora_path, output_dir, seed, device_map):
     if model_name in ["instructpix2pix", "hqedit", "flux", "step1x", "ultraedit", "anyedit", "qwen-image-edit", "motionedit"]:
         if model_name == "instructpix2pix":
             from diffusers import EulerAncestralDiscreteScheduler, StableDiffusionInstructPix2PixPipeline
             model_id = "timbrooks/instruct-pix2pix"
-            pipe = StableDiffusionInstructPix2PixPipeline.from_pretrained(model_id, torch_dtype=torch.float16, safety_checker=None)
+            pipe = StableDiffusionInstructPix2PixPipeline.from_pretrained(
+                model_id,
+                torch_dtype=torch.float16,
+                safety_checker=None,
+                device_map=device_map,
+            )
             pipe.scheduler = EulerAncestralDiscreteScheduler.from_config(pipe.scheduler.config)
         elif model_name == "hqedit":
             from diffusers import EulerAncestralDiscreteScheduler, StableDiffusionInstructPix2PixPipeline
             model_id = "MudeHui/HQ-Edit"
-            pipe = StableDiffusionInstructPix2PixPipeline.from_pretrained(model_id, torch_dtype=torch.float16, safety_checker=None)
+            pipe = StableDiffusionInstructPix2PixPipeline.from_pretrained(
+                model_id,
+                torch_dtype=torch.float16,
+                safety_checker=None,
+                device_map=device_map,
+            )
             pipe.scheduler = EulerAncestralDiscreteScheduler.from_config(pipe.scheduler.config)
         elif model_name == "flux": 
             from diffusers import FluxKontextPipeline
-            pipe = FluxKontextPipeline.from_pretrained("black-forest-labs/FLUX.1-Kontext-dev", torch_dtype=torch.bfloat16)
+            pipe = FluxKontextPipeline.from_pretrained(
+                "black-forest-labs/FLUX.1-Kontext-dev",
+                torch_dtype=torch.bfloat16,
+                device_map=device_map,
+            )
         elif model_name == "step1x":
             warnings.warn("Step1X requires a special diffusers branch. Please refer to the installation command below or the original Step1X repository.")
             '''
@@ -51,7 +65,11 @@ def process_slice(slice_items, model_name, lora_path, output_dir, seed):
             pip install -e .
             '''
             from diffusers import Step1XEditPipeline
-            pipe = Step1XEditPipeline.from_pretrained("stepfun-ai/Step1X-Edit-v1p1-diffusers", torch_dtype=torch.bfloat16)
+            pipe = Step1XEditPipeline.from_pretrained(
+                "stepfun-ai/Step1X-Edit-v1p1-diffusers",
+                torch_dtype=torch.bfloat16,
+                device_map=device_map,
+            )
         elif model_name == "ultraedit":
             warnings.warn("UltraEdit requires a special diffusers branch. Please refer to the installation command below or the original Step1X repository.")
             '''
@@ -60,10 +78,18 @@ def process_slice(slice_items, model_name, lora_path, output_dir, seed):
             pip install -e .
             '''
             from diffusers import StableDiffusion3InstructPix2PixPipeline
-            pipe = StableDiffusion3InstructPix2PixPipeline.from_pretrained("BleachNick/SD3_UltraEdit_w_mask", torch_dtype=torch.float16)
+            pipe = StableDiffusion3InstructPix2PixPipeline.from_pretrained(
+                "BleachNick/SD3_UltraEdit_w_mask",
+                torch_dtype=torch.float16,
+                device_map=device_map,
+            )
         elif model_name in ["qwen-image-edit", "motionedit"]:
             from diffusers import QwenImageEditPlusPipeline
-            pipe = QwenImageEditPlusPipeline.from_pretrained("Qwen/Qwen-Image-Edit-2509", torch_dtype=torch.bfloat16)
+            pipe = QwenImageEditPlusPipeline.from_pretrained(
+                "Qwen/Qwen-Image-Edit-2509",
+                torch_dtype=torch.bfloat16,
+                device_map=device_map,
+            )
         elif model_name == "anyedit":
             warnings.warn("AnyEdit requires a special model pipeline with selected adapters. Please clone the official repository and resolve dependencies before running the inference code.")
             import sys
@@ -78,7 +104,7 @@ def process_slice(slice_items, model_name, lora_path, output_dir, seed):
 
             pipe = AnySDPipeline(adapters_list=[adapter_checkpoints], task_embs_checkpoints=task_embs_checkpoints)
         
-        if model_name != "anyedit":
+        if model_name != "anyedit" and device_map is None:
             pipe.to("cuda")
         print('Loaded model weights...')
     elif model_name == 'magicbrush':
@@ -190,6 +216,7 @@ if __name__ == "__main__":
     parser.add_argument("--lora_path", type=str, required=False, default=None)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--test", action='store_true')
+    parser.add_argument("--device_map", default=None, help="Set to 'balanced' or 'auto' to shard across multiple GPUs.")
     args = parser.parse_args()
     
     ray.init(include_dashboard=False, logging_level="ERROR")
@@ -217,6 +244,7 @@ if __name__ == "__main__":
             args.lora_path,
             output_path,
             args.seed,
+            args.device_map,
         ) for i in range(gpu_count)
     ])
    

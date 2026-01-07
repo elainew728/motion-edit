@@ -6,7 +6,10 @@ from typing import Optional
 import torch
 from diffusers import QwenImageEditPlusPipeline
 from PIL import Image
+from huggingface_hub import login
 
+HF_TOKEN = YOUR_HF_TOKEN_HERE
+login(token=HF_TOKEN)
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Single-image inference for the MotionEdit LoRA.")
@@ -40,6 +43,11 @@ def parse_args():
         "--device",
         default="cuda" if torch.cuda.is_available() else "cpu",
         help="Device used for inference. Defaults to CUDA when available.",
+    )
+    parser.add_argument(
+        "--device_map",
+        default=None,
+        help="Set to 'balanced' or 'auto' to shard across multiple GPUs.",
     )
     return parser.parse_args()
 
@@ -96,7 +104,8 @@ def main():
     input_image = Image.open(image_path).convert("RGB")
 
     pipe = QwenImageEditPlusPipeline.from_pretrained("Qwen/Qwen-Image-Edit-2509", torch_dtype=torch.bfloat16)
-    pipe.to(args.device)
+    if args.device_map is None:
+        pipe.to(args.device)
     load_motionedit_adapter(pipe, args.lora_path)
 
     output_image = pipe(
