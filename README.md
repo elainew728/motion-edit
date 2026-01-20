@@ -38,6 +38,7 @@ Create and activate the conda environment with dependencies that supports infere
 ```
 conda env create -f environment.yml
 conda activate motionedit
+pip install flash-attn==2.7.4.post1 --no-build-isolation
 ```
 Finally, configure your own huggingface token to access restricted models by modifying `YOUR_HF_TOKEN_HERE` in [inference/run_image_editing.py](https://github.com/elainew728/motion-edit/tree/main/inference/run_image_editing.py).
 
