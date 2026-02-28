@@ -24,6 +24,7 @@ from diffusers import FluxKontextPipeline
 from transformers.models.clip.modeling_clip import CLIPEncoderLayer
 from transformers.models.t5.modeling_t5 import T5Block
 import numpy as np
+from datasets import load_dataset
 import flow_grpo.rewards
 from flow_grpo.stat_tracking import PerPromptStatTracker
 from flow_grpo.diffusers_patch.kontext_pipeline_with_logprob import (
@@ -148,7 +149,50 @@ class PromptImageDataset(Dataset):
         gt_images = [example["gt_image"] for example in examples]
         return prompts, metadatas, images, gt_images
 
+class MotionEditDataset(Dataset):
+    def __init__(self, dataset_name, resolution=512, split="train"):
+        self.dataset_name = dataset_name
+        self.resolution = resolution
+        self.split = split
+        self.dataset = load_dataset(dataset_name)["train"]
+        if self.split == "test":
+            self.dataset = self.dataset.select(range(min(10, len(self.dataset))))
 
+    def __len__(self):
+        return len(self.dataset)
+
+    def _prepare_image(self, image):
+        image = image.convert("RGB")
+        w, h = image.size
+        if w != h:
+            min_dim = min(w, h)
+            left = (w - min_dim) // 2
+            top = (h - min_dim) // 2
+            right = left + min_dim
+            bottom = top + min_dim
+            image = image.crop((left, top, right, bottom))
+        image = image.resize((self.resolution, self.resolution), Image.Resampling.LANCZOS)
+        return image
+
+    def __getitem__(self, idx):
+        row = self.dataset[idx]
+        item = {
+            "prompt": row["prompt"],
+            "metadata": {"id": row.get("id", "")},
+        }
+        image = self._prepare_image(row["input_image"])
+        gt_image = self._prepare_image(row["target_image"])
+        item["image"] = image
+        item["gt_image"] = gt_image
+        return item
+
+    @staticmethod
+    def collate_fn(examples):
+        prompts = [example["prompt"] for example in examples]
+        metadatas = [example["metadata"] for example in examples]
+        images = [example["image"] for example in examples]
+        gt_images = [example["gt_image"] for example in examples]
+        return prompts, metadatas, images, gt_images
 
 class DistributedKRepeatSampler(Sampler):
     def __init__(
@@ -170,12 +214,33 @@ class DistributedKRepeatSampler(Sampler):
         self.banned_prompts = banned_prompts if banned_prompts is not None else set()
         self.last_banned_prompts_len = len(self.banned_prompts)
         self.valid_indices_cache = None
+        self.prompt_list_cache = None
+
+    def get_prompt_list(self):
+        if self.prompt_list_cache is not None:
+            return self.prompt_list_cache
+
+        if hasattr(self.dataset, "prompts"):
+            self.prompt_list_cache = list(self.dataset.prompts)
+            return self.prompt_list_cache
+
+        # HuggingFace datasets expose column access via dataset["prompt"].
+        if hasattr(self.dataset, "dataset"):
+            hf_ds = self.dataset.dataset
+            if hasattr(hf_ds, "column_names") and "prompt" in hf_ds.column_names:
+                self.prompt_list_cache = list(hf_ds["prompt"])
+                return self.prompt_list_cache
+
+        # Generic fallback for custom datasets.
+        self.prompt_list_cache = [self.dataset[i]["prompt"] for i in range(len(self.dataset))]
+        return self.prompt_list_cache
 
     def get_valid_indices(self):
         start_time = time.time()
         if self.valid_indices_cache is None or self.last_banned_prompts_len != len(self.banned_prompts):
+            prompt_list = self.get_prompt_list()
             self.valid_indices_cache = [
-                i for i, prompt in enumerate(self.dataset.prompts)
+                i for i, prompt in enumerate(prompt_list)
                 if prompt not in self.banned_prompts
             ]
             self.last_banned_prompts_len = len(self.banned_prompts)
@@ -217,6 +282,10 @@ def gather_tensor_to_all(tensor, world_size):
     dist.all_gather(gathered_tensors, tensor)
     return torch.cat(gathered_tensors, dim=0).cpu()
 
+def gather_tensor_to_all_device(tensor, world_size):
+    gathered_tensors = [torch.zeros_like(tensor) for _ in range(world_size)]
+    dist.all_gather(gathered_tensors, tensor)
+    return torch.cat(gathered_tensors, dim=0)
 
 def compute_text_embeddings(
     prompt, text_encoders, tokenizers, max_sequence_length, device
@@ -432,6 +501,13 @@ def save_ckpt(
             ema.copy_temp_to(transformer_trainable_parameters)
         logger.info(f"Saved checkpoint to {save_root}")
 
+def preprocess_images(image_list, image_processor, height, width, device, dtype):
+    if not isinstance(image_list, list):
+        image_list = [image_list]
+    image_list = [img.convert("RGB") for img in image_list]
+    resized = image_processor.resize(image_list, height, width)
+    images = image_processor.preprocess(resized, height, width)
+    return images.to(device=device, dtype=dtype)
 
 def main(_):
     config = FLAGS.config
@@ -475,7 +551,12 @@ def main(_):
     scaler = GradScaler(enabled=enable_amp)
 
     # --- Load pipeline and models ---
-    pipeline = FluxKontextPipeline.from_pretrained(config.pretrained.model)
+    load_dtype = mixed_precision_dtype if mixed_precision_dtype is not None else torch.float32
+    pipeline = FluxKontextPipeline.from_pretrained(
+        config.pretrained.model,
+        torch_dtype=load_dtype,
+        low_cpu_mem_usage=True,
+    )
     pipeline.vae.requires_grad_(False)
     pipeline.text_encoder.requires_grad_(False)
     pipeline.text_encoder_2.requires_grad_(False)
@@ -569,10 +650,18 @@ def main(_):
     )
 
     # --- Datasets and Dataloaders ---
-    train_dataset = PromptImageDataset(
-        config.dataset, config.resolution, "train"
-    )
-    test_dataset = PromptImageDataset(config.dataset, config.resolution, "test")
+    use_hf_dataset = bool(getattr(config, "use_hf_dataset", False))
+    dataset_hf_name = getattr(config, "dataset_hf_name", "")
+    if use_hf_dataset:
+        train_dataset = MotionEditDataset(
+            dataset_hf_name or config.dataset, config.resolution, "train"
+        )
+        test_dataset = MotionEditDataset(
+            dataset_hf_name or config.dataset, config.resolution, "test"
+        )
+    else:
+        train_dataset = PromptImageDataset(config.dataset, config.resolution, "train")
+        test_dataset = PromptImageDataset(config.dataset, config.resolution, "test")
 
     train_sampler = DistributedKRepeatSampler(
         dataset=train_dataset,

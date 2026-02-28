@@ -23,6 +23,7 @@ import logging
 from diffusers import QwenImageEditPlusPipeline
 from transformers.models.qwen2_5_vl.modeling_qwen2_5_vl import Qwen2_5_VLVisionBlock, Qwen2_5_VLDecoderLayer
 import numpy as np
+from datasets import load_dataset
 import flow_grpo.rewards
 from flow_grpo.stat_tracking import PerPromptStatTracker
 from flow_grpo.diffusers_patch.qwen_image_edit_pipeline_with_logprob import (
@@ -210,6 +211,67 @@ class PromptImageDataset(Dataset):
         return prompts, metadatas, images, gt_images
 
 
+class MotionEditDataset(Dataset):
+    def __init__(self, dataset_name, resolution=512, split="train"):
+        self.dataset_name = dataset_name
+        self.resolution = resolution
+        self.split = split
+        self.dataset = load_dataset(dataset_name)["train"]
+        if self.split == "test":
+            self.dataset = self.dataset.select(range(min(10, len(self.dataset))))
+
+    def __len__(self):
+        return len(self.dataset)
+
+    def _prepare_image_pair(self, image, gt_image):
+        image = image.convert("RGB")
+        gt_image = gt_image.convert("RGB")
+        gt_image, crop_direction, new_w, new_h = auto_crop_black_bars(gt_image)
+        if crop_direction is not None:
+            pred_img_w, pred_img_h = image.size
+            if crop_direction == "horizontal":
+                top = (pred_img_h - new_h) // 2
+                bottom = top + new_h
+                image = image.crop((0, top, pred_img_w, bottom))
+            else:
+                left = (pred_img_w - new_w) // 2
+                right = left + new_w
+                image = image.crop((left, 0, right, pred_img_h))
+
+        return image, gt_image
+
+    def _center_crop_resize(self, image):
+        w, h = image.size
+        if w != h:
+            min_dim = min(w, h)
+            left = (w - min_dim) // 2
+            top = (h - min_dim) // 2
+            right = left + min_dim
+            bottom = top + min_dim
+            image = image.crop((left, top, right, bottom))
+        image = image.resize((self.resolution, self.resolution), Image.Resampling.LANCZOS)
+        return image
+
+    def __getitem__(self, idx):
+        row = self.dataset[idx]
+        item = {
+            "prompt": row["prompt"],
+            "metadata": {"id": row.get("id", "")},
+        }
+        image, gt_image = self._prepare_image_pair(row["input_image"], row["target_image"])
+        item["image"] = self._center_crop_resize(image)
+        item["gt_image"] = self._center_crop_resize(gt_image)
+        return item
+
+    @staticmethod
+    def collate_fn(examples):
+        prompts = [example["prompt"] for example in examples]
+        metadatas = [example["metadata"] for example in examples]
+        images = [example["image"] for example in examples]
+        gt_images = [example["gt_image"] for example in examples]
+        return prompts, metadatas, images, gt_images
+
+
 class DistributedKRepeatSampler(Sampler):
     def __init__(
         self, dataset, batch_size, k, num_replicas, rank, seed=0, banned_prompts=None
@@ -230,12 +292,33 @@ class DistributedKRepeatSampler(Sampler):
         self.banned_prompts = banned_prompts if banned_prompts is not None else set()
         self.last_banned_prompts_len = len(self.banned_prompts)
         self.valid_indices_cache = None
+        self.prompt_list_cache = None
+
+    def get_prompt_list(self):
+        if self.prompt_list_cache is not None:
+            return self.prompt_list_cache
+
+        if hasattr(self.dataset, "prompts"):
+            self.prompt_list_cache = list(self.dataset.prompts)
+            return self.prompt_list_cache
+
+        # HuggingFace datasets expose column access via dataset["prompt"].
+        if hasattr(self.dataset, "dataset"):
+            hf_ds = self.dataset.dataset
+            if hasattr(hf_ds, "column_names") and "prompt" in hf_ds.column_names:
+                self.prompt_list_cache = list(hf_ds["prompt"])
+                return self.prompt_list_cache
+
+        # Generic fallback for custom datasets.
+        self.prompt_list_cache = [self.dataset[i]["prompt"] for i in range(len(self.dataset))]
+        return self.prompt_list_cache
 
     def get_valid_indices(self):
         start_time = time.time()
         if self.valid_indices_cache is None or self.last_banned_prompts_len != len(self.banned_prompts):
+            prompt_list = self.get_prompt_list()
             self.valid_indices_cache = [
-                i for i, prompt in enumerate(self.dataset.prompts)
+                i for i, prompt in enumerate(prompt_list)
                 if prompt not in self.banned_prompts
             ]
             self.last_banned_prompts_len = len(self.banned_prompts)
@@ -602,10 +685,18 @@ def main(_):
     )
 
     # --- Datasets and Dataloaders ---
-    train_dataset = PromptImageDataset(
-        config.dataset, config.resolution, "train"
-    )
-    test_dataset = PromptImageDataset(config.dataset, config.resolution, "test")
+    use_hf_dataset = bool(getattr(config, "use_hf_dataset", False))
+    dataset_hf_name = getattr(config, "dataset_hf_name", "")
+    if use_hf_dataset:
+        train_dataset = MotionEditDataset(
+            dataset_hf_name or config.dataset, config.resolution, "train"
+        )
+        test_dataset = MotionEditDataset(
+            dataset_hf_name or config.dataset, config.resolution, "test"
+        )
+    else:
+        train_dataset = PromptImageDataset(config.dataset, config.resolution, "train")
+        test_dataset = PromptImageDataset(config.dataset, config.resolution, "test")
 
     train_sampler = DistributedKRepeatSampler(
         dataset=train_dataset,

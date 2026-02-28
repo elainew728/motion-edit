@@ -13,6 +13,8 @@ def _get_config(base_model="qwen_image_edit", n_gpus=1, gradient_step_per_epoch=
     config.base_model = base_model
     config.transformer_path = None
     config.dataset = f"{current_parent_directory}/motionedit_data"
+    config.use_hf_dataset = True # False
+    config.dataset_hf_name = "elaine1wan/MotionEdit-Train"
     
     config.pretrained.model = "Qwen/Qwen-Image-Edit-2509"
     config.sample.num_steps = 6

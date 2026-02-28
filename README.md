@@ -58,14 +58,14 @@ The script automatically loads `examples/input_examples/512.txt` when `--prompt`
 
 
 ## 🚀 Training with MotionNFT
-We have released our training set [here](https://huggingface.co/datasets/elaine1wan/MotionEdit-Train).
-
 To run training code, first change your working directory to the train folder:
 ```
 cd train
 ```
 
-### Step 0: Data Format
+### Step 0: Data Format (Optional: If you wish to use your own dataset.)
+This step is for preprocessing and formatting your own data for training. *You can safely ignore this step if you plan to use our [MotionEdit-Train](https://huggingface.co/datasets/elaine1wan/MotionEdit-Train) dataset for training.* 
+
 Please format your training data according to the following structure. Place your `{}_metadata.jsonl` files under the folder `motionedit_data/` in the `train/` directory.
 
 Data Folder structure:
@@ -98,6 +98,12 @@ python reward_server/reward_server.py
 ### Step 2: Configure Training
 
 See [train/config/qwen_image_edit_nft.py](https://github.com/elainew728/motion-edit/tree/main/train/config/qwen_image_edit_nft.py) and [train/config/kontext_nft.py](https://github.com/elainew728/motion-edit/tree/main/train/config/kontext_nft.py) for available configurations.
+
+**The default setting uses MotionEdit-Train for training**. If you hope to use your own dataset, set the following in the config file:
+```
+config.use_hf_dataset = False
+config.dataset = # Your own dataset path
+```
 
 ### Step 3: Run Training
 

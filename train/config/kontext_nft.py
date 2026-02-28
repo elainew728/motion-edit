@@ -12,6 +12,8 @@ def _get_config(base_model="kontext", n_gpus=1, gradient_step_per_epoch=1, rewar
 
     config.base_model = base_model
     config.dataset = f"{current_parent_directory}/motionedit_data"
+    config.use_hf_dataset = True # False
+    config.dataset_hf_name = "elaine1wan/MotionEdit-Train"
 
     config.pretrained.model = "black-forest-labs/FLUX.1-Kontext-dev"
     config.sample.num_steps = 6
