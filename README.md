@@ -20,6 +20,8 @@
 **MotionEdit** is a novel dataset and benchmark for motion-centric image editing. We also propose **MotionNFT** (Motion-guided Negative-aware FineTuning), a post-training framework with motion alignment rewards to guide models on motion image editing task.
 
 # 📣 News
+* **[2026/02/20]**: 🎉 **MotionEdit** is accepted to **CVPR 2026**! See you in Denver! 😄
+* **[2026/01]** We release [MotionEdit-Bench](https://huggingface.co/datasets/elaine1wan/MotionEdit-Bench) and [MotionEdit-Train](https://huggingface.co/datasets/elaine1wan/MotionEdit-Train). Enjoy! 😁 
 * **[2025/12/11]**: 🤩 We release **MotionEdit**, a novel dataset and benchmark for motion-centric image editing. Along with the dataset, we propose **MotionNFT (Motion-guided Negative-aware FineTuning)**, a post-training framework with motion alignment rewards to guide models on motion editing task.
 
 # 🔧 Usage
@@ -56,7 +58,7 @@ The script automatically loads `examples/input_examples/512.txt` when `--prompt`
 
 
 ## 🚀 Training with MotionNFT
-We are working on releasing and refining the training pipeline using our MotionNFT method. Stay tuned!
+We have released our training set [here](https://huggingface.co/datasets/elaine1wan/MotionEdit-Train).
 
 To run training code, first change your working directory to the train folder:
 ```
